@@ -3,7 +3,11 @@ const app = express()
 const port = 4000
 const cors = require("cors")
 const mongoose = require("mongoose");
+const md5 = require("md5");
+Userfound = 0
+
 uae = 5;
+int=0;
 // npm init
 // npm i express cors nodemon
 // they add a handy req.body object to our req,
@@ -32,7 +36,7 @@ const UserDB = new mongoose.Schema({
     },
 
     mobile:{
-        type: Number, required: true, unique:true
+        type: Number, required: true
     },
 
     password:{
@@ -51,7 +55,7 @@ const IssuerDB = new mongoose.Schema({
     },
 
     mobile:{
-        type: Number, required: true, unique:true
+        type: Number, required: true
     },
 
     password:{
@@ -62,51 +66,110 @@ const IssuerDB = new mongoose.Schema({
 const User = mongoose.model("User", UserDB);
 
 
+
 const Issuer = mongoose.model("Issuer", IssuerDB);
+
+
+
 
 
 app.get("/", cors(), async (req, res) => {
 	res.send("This is working")
 })
 app.get("/home", cors(), async (req, res) => {
-    if(uae==0 && uae==1){
-        res.send("Email already exists Please try to login")
-    }
+        if(Userfound){
+            res.redirect("http://localhost:3000/issuerdash")
+        }
+    
 })
+app.post("/post_login", async (req, res) => {
+    let  name = req.body
+	str = JSON.stringify(name);
+    data = JSON.parse(str);
+    if(data.Userdetails.Person == 10){
+        User.findOne({email:data.Userdetails.Mail},function(err,data2){
+            if(data2){
+            if(data2.password==md5(data.Userdetails.Password)) {
+                console.log("Userfound")
+               Userfound = 1;
+            }
+            else{
+                console.log("Password Not Matched")
+            }
+            }
+            else{
+                console.log("Email Not Registered")
+            }
+            
+            
+                })
+    }
+    
+   else if(data.Userdetails.Person == 20){
+        Issuer.findOne({email:data.Userdetails.Mail},function(err,data2){
+            if(data2){
+                if(data2.password==md5(data.Userdetails.Password)) {
+                    console.log("Issuerfound")
+                }
+                else{
+                    console.log("Password Not Matched")
+                }
+                }
+                else{
+                    console.log("Email Not Registered")
+                }
+        })
+    }
 
+    else{
+        console.log("Please Select if u are either User or Issuer")
+    }
 
+res.redirect("/home")
+})
 
 app.post("/post_user", async (req, res) => {
 	let  name = req.body
 	str = JSON.stringify(name);
     data = JSON.parse(str);
     console.log(data);
-    User.find(function (err, fruits) {
-        if (err) {
-          console.log(err);
-        } else {      
-          fruits.forEach(function (fruit) {
-           mail=  fruit.email;
-           if (mail==data.Userdetails.Mail){
-            console.log("User Already Exists Please Login");
-            uae = 0;
-           } else{
-            console.log("hi")
-            const user = new User({
-                fname: data.Userdetails.Firstname,
-                lname: data.Userdetails.Lastname,
-                email: data.Userdetails.Mail,
-                mobile:data.Userdetails.Mobilenumber,
-                password:data.Userdetails.Password
-              });
-            
-              user.save();
+    hashedpwd=md5(data.Userdetails.Password)
 
-           }
-     
-          });
+  
+    User.findOne({email:data.Userdetails.Mail},function(err,data2){
+        if(!data2){
+            var c;
+            User.findOne({},function(err,data2){
+
+                if (data2) {
+                    console.log("if");
+                    c = data.unique_id + 1;
+                }else{
+                    c=1;
+                }
+
+                var user = new User({
+                    fname: data.Userdetails.Firstname,
+                    lname: data.Userdetails.Lastname,
+                    email: data.Userdetails.Mail,
+                    mobile:data.Userdetails.Mobilenumber,
+                    password:hashedpwd
+                });
+
+                user.save(function(err, Person){
+                    if(err)
+                        console.log(err);
+                    else
+                        console.log('Success');
+                });
+
+            }).sort({_id: -1}).limit(1);
+            console.log({"Success":"You are regestered,You can login now."});
+        }else{
+            console.log({"Success":"Email is already used."});
         }
-      });
+
+    });
 	
 
   
@@ -120,45 +183,41 @@ app.post("/post_issuer", async (req, res) => {
 	str = JSON.stringify(name);
     data = JSON.parse(str);
     console.log(data);
-   
-    Issuer.find(function (err, fruits) {
-        if (err) {
-          console.log(err);
-        } 
-        if(fruits){
-          fruits.forEach(function (fruit) {
-            mail=  fruit.email;
-            if (mail==data.Userdetails.Mail){
-             console.log("Issuer Already Exists Please Login")
-             uae = 1
-             mongoose.connection.close()
-             
-        }
-           else{
-            const issuer = new Issuer({
-                name: data.Userdetails.Companyname,
-                email: data.Userdetails.Mail,
-                mobile:data.Userdetails.Mobilenumber,
-                password:data.Userdetails.Password
-              });
-              
-              issuer.save();
-           }
-          });
-        }
-        else{
-          const issuer = new Issuer({
-            name: data.Userdetails.Companyname,
-            email: data.Userdetails.Mail,
-            mobile:data.Userdetails.Mobilenumber,
-            password:data.Userdetails.Password
-          });
-          
-          issuer.save();
-        }
-      });
+    hashedpwd=md5(data.Userdetails.Password)
+        Issuer.findOne({email:data.Userdetails.Mail},function(err,data2){
+            if(!data2){
+                var c;
+                Issuer.findOne({},function(err,data2){
 
-	  
+                    if (data2) {
+                        console.log("if");
+                        c = data.unique_id + 1;
+                    }else{
+                        c=1;
+                    }
+                    var issuer = new Issuer({
+                        name: data.Userdetails.Companyname,
+                        email: data.Userdetails.Mail,
+                        mobile:data.Userdetails.Mobilenumber,
+                        password:hashedpwd
+                    });
+
+                    issuer.save(function(err, Person){
+                        if(err)
+                            console.log(err);
+                        else
+                            console.log('Success');
+                    });
+
+                }).sort({_id: -1}).limit(1);
+                console.log({"Success":"You are regestered,You can login now."});
+            }else{
+                console.log({"Success":"Email is already used."});
+            }
+
+        });
+    
+	
 })
 
 app.listen(port, () => {
