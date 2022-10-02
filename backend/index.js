@@ -4,6 +4,10 @@ const port = 4000
 const cors = require("cors")
 const mongoose = require("mongoose");
 const md5 = require("md5");
+const jwt = require("jsonwebtoken");
+const JWT_TOKEN  = "iloveyou";
+var fetchuser = require("./Middleware/fetchuser");
+
 
 Userfound = 0
 
@@ -50,15 +54,24 @@ app.post("/post_login", async (req, res) => {
         User.findOne({email:data.Userdetails.Mail},function(err,data2){
             if(data2){
             if(data2.password==md5(data.Userdetails.Password)) {
-                console.log("Userfound")
+                const rawdata = {
+                    user : {
+                       email: data2.Mail,
+                       password: data2.password
+                    }
+                    }
+                
+                    const authtoken = jwt.sign(rawdata,JWT_TOKEN);
+console.log(authtoken)
+                res.send("Userfound")
                Userfound = 1;
             }
             else{
-                console.log("Password Not Matched")
+                res.send("Password Not Matched")
             }
             }
             else{
-                console.log("Email Not Registered")
+                res.send("Email Not Registered")
             }
             
             
@@ -69,20 +82,29 @@ app.post("/post_login", async (req, res) => {
         Issuer.findOne({email:data.Userdetails.Mail},function(err,data2){
             if(data2){
                 if(data2.password==md5(data.Userdetails.Password)) {
-                    console.log("Issuerfound")
+                    const rawdata = {
+                        user : {
+                            name: data2.id
+                        }
+                        }
+                    
+                        const authtoken = jwt.sign(rawdata,JWT_TOKEN);
+    
+                        console.log(authtoken)
+                        res.send("Issuerfound")
                 }
                 else{
-                    console.log("Password Not Matched")
+                    res.send("Password Not Matched")
                 }
                 }
                 else{
-                    console.log("Email Not Registered")
+                    res.send("Email Not Registered")
                 }
         })
     }
 
     else{
-        console.log("Please Select if u are either User or Issuer")
+        res.send("Please Select if u are either User or Issuer")
     }
 
 res.redirect("/home")
@@ -94,7 +116,6 @@ app.post("/post_user", async (req, res) => {
     data = JSON.parse(str);
     console.log(data);
     hashedpwd=md5(data.Userdetails.Password)
-
   
     User.findOne({email:data.Userdetails.Mail},function(err,data2){
         if(!data2){
@@ -113,8 +134,19 @@ app.post("/post_user", async (req, res) => {
                     lname: data.Userdetails.Lastname,
                     email: data.Userdetails.Mail,
                     mobile:data.Userdetails.Mobilenumber,
-                    password:hashedpwd
+                    password:hashedpwd,
+                    // noofcertifications:9
                 });
+                const rawdata = {
+                    user : {
+                        id: user.id
+                    }
+                    }
+                
+                    const authtoken = jwt.sign(rawdata,JWT_TOKEN);
+
+                    console.log(authtoken)
+                   
 
                 user.save(function(err, Person){
                     if(err)
@@ -126,7 +158,7 @@ app.post("/post_user", async (req, res) => {
             }).sort({_id: -1}).limit(1);
             console.log({"Success":"You are regestered,You can login now."});
         }else{
-            console.log({"Success":"Email is already used."});
+            console.log({"failure":"Email is already used."});
         }
 
     });
@@ -172,13 +204,24 @@ app.post("/post_issuer", async (req, res) => {
                 }).sort({_id: -1}).limit(1);
                 console.log({"Success":"You are regestered,You can login now."});
             }else{
-                console.log({"Success":"Email is already used."});
+                console.log({"failure":"Email is already used."});
             }
 
         });
     
 	
 })
+
+app.post('/getuser',fetchuser,  async (req, res) => {
+    try {
+      userId = req.user.id;
+      const user = await User.findById(userId).select("-password")
+console.log(user)
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send("Internal Server Error");
+    }
+  })
 
 app.listen(port, () => {
 	console.log(`Listening at http://localhost:${port}`)
