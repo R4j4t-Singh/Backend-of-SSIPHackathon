@@ -4,70 +4,30 @@ const port = 4000
 const cors = require("cors")
 const mongoose = require("mongoose");
 const md5 = require("md5");
+
 Userfound = 0
-
-uae = 5;
-int=0;
-// npm init
-// npm i express cors nodemon
-// they add a handy req.body object to our req,
-// containing a Javascript
-//  object representing the payload sent with the request
-
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
-app.use(cors())
-
 
 mongoose.connect("mongodb://localhost:27017/SSIPHackathon", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-const UserDB = new mongoose.Schema({
-	fname: {
-        type: String, required: true
-    },
 
-    lname:String,
-
-    email:{
-        type: String, required: true, unique:true
-    },
-
-    mobile:{
-        type: Number, required: true
-    },
-
-    password:{
-        type: String, required:true
-    }
-});
-
-
-const IssuerDB = new mongoose.Schema({
-	name: {
-        type: String, required: true
-    },
-
-    email:{
-        type: String, required: true, unique:true
-    },
-
-    mobile:{
-        type: Number, required: true
-    },
-
-    password:{
-        type: String, required:true
-    }
-});
-
-const User = mongoose.model("User", UserDB);
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(cors())
 
 
 
-const Issuer = mongoose.model("Issuer", IssuerDB);
+// app.use('/api/authuser', require('./routes/authuser'))
+// app.use('api/authissuer', require('./routes/authissuer'))
+// app.use('/api/certifications', require('./routes/certifications'))
+
+
+const User = require("./Models/User")
+
+
+const Issuer = require("./Models/Issuer")
 
 
 
@@ -78,7 +38,7 @@ app.get("/", cors(), async (req, res) => {
 })
 app.get("/home", cors(), async (req, res) => {
         if(Userfound){
-            res.redirect("http://localhost:3000/issuerdash")
+            res.send("welcome")
         }
     
 })
