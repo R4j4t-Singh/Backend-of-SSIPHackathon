@@ -50,6 +50,7 @@ app.post("/post_login", async (req, res) => {
     let  name = req.body
 	str = JSON.stringify(name);
     data = JSON.parse(str);
+    console.log(data)
     if(data.Userdetails.Person == 10){
         User.findOne({email:data.Userdetails.Mail},function(err,data2){
             if(data2){
@@ -63,7 +64,7 @@ app.post("/post_login", async (req, res) => {
                 
                     const authtoken = jwt.sign(rawdata,JWT_TOKEN);
 console.log(authtoken)
-                res.send("Userfound")
+                console.log("Userfound")
                Userfound = 1;
             }
             else{
@@ -107,7 +108,7 @@ console.log(authtoken)
         res.send("Please Select if u are either User or Issuer")
     }
 
-res.redirect("/home")
+// res.redirect("/home")
 })
 
 app.post("/post_user", async (req, res) => {
