@@ -7,6 +7,9 @@ const studentslistDB = new mongoose.Schema({
     issueremail:{
         type: String, required: true
     },
+    issuername:{
+        type: String, required: true
+    },
     StudentName:{
         type: String, required: true
     },

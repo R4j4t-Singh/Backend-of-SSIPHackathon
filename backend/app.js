@@ -16,8 +16,6 @@ app.use(express.json())
 
 // Available Routes
 app.use('/api/auth', require('./routes/auth'))
-// app.use('/api/courses', require('./routes/courses'))
-// app.use('/api/studenṭs', require('./routes/students'))
 
 
 app.listen(port, () => {

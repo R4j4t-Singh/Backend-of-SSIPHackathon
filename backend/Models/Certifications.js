@@ -1,23 +1,25 @@
 const mongoose = require("mongoose");
 
 const CertificationsDB = new mongoose.Schema({
-	
-    Certificateid:{
-        type: Number,
-    },
+  issueremail: {
+    type: String,
+    required: true,
+  },
 
-    issueremail:{
-        type: String, required: true
-    },
+  coursename: {
+    type: String,
+    required: true,
+    unique: true,
+  },
 
-    coursename:{
-        type: String, required: true, unique:true
-    },
-
-    issuername:{
-        type: String, required: true
-    }
-
+  issuername: {
+    type: String,
+    required: true,
+  },
+  certificatetype: {
+    type: Number,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Certifications", CertificationsDB);
